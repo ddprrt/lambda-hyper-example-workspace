@@ -28,18 +28,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-
-async fn _handle(req: Request<Body>) -> Result<Response<Body>> {
-    // Aggregate the body...
-    let whole_body = hyper::body::aggregate(req).await?;
-    // Decode as JSON...
-    let data: Value = serde_json::from_reader(whole_body.reader())?;
-
-    let json = handler(Event(data)).await?.to_string();
-
-    let response = Response::builder()
-        .status(StatusCode::OK)
-        .header(header::CONTENT_TYPE, "application/json")
-        .body(Body::from(json))?;
-    Ok(response)
-}

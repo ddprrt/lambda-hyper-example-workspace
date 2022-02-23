@@ -1,11 +1,9 @@
 mod http_layer;
 
-use app::{handler, Error, Event};
+use app::{handler, Error};
 use http_layer::HttpParserLayer;
-use hyper::{
-    body::Buf, header, service::make_service_fn, Body, Request, Response, Server, StatusCode,
-};
-use serde_json::Value;
+use hyper::{service::make_service_fn, Server};
+
 use std::result;
 use std::{convert::Infallible, time::Duration};
 use tower::{timeout::TimeoutLayer, ServiceBuilder};

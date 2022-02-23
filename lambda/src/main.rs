@@ -1,16 +1,21 @@
-use lambda_runtime::{service_fn, LambdaEvent};
+mod lambda_event_layer;
 
-use app::{handler, Error, Event};
-use serde_json::Value;
+use std::time::Duration;
+
+use lambda_event_layer::LambdaEventLayer;
+use lambda_runtime::service_fn;
+
+use app::{handler, Error};
+
+use tower::{timeout::TimeoutLayer, ServiceBuilder};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let func = service_fn(func);
+    let func = service_fn(handler);
+    let func = ServiceBuilder::new()
+        .layer(TimeoutLayer::new(Duration::from_secs(3 * 60)))
+        .layer(LambdaEventLayer::new())
+        .service(func);
     lambda_runtime::run(func).await?;
     Ok(())
-}
-
-async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
-    let (val, _) = event.into_parts();
-    handler(Event(val)).await
 }
